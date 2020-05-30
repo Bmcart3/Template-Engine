@@ -9,6 +9,7 @@ const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
+const team = [];
 
 
 // Write code to use inquirer to gather information about the development team members,
@@ -36,3 +37,68 @@ const render = require("./lib/htmlRenderer");
 
 
 //do the inquirer prompts here.
+const initialQuestions = () => {
+    inquirer.prompt([
+        {
+            message: "What is your name?",
+            name: "name"
+        },
+        {
+            message: "What is your employee id?",
+            name: "id"
+        },
+        {
+            message: "What is your e-mail?",
+            name: "email"
+        },
+        {
+            type: "list",
+            message: "What is your role?",
+            choices: ["Engineer", "Intern", "Manager"],
+            name: "role"
+        }
+    ]).then(function (answers) {
+        roleChecker(answers);
+    });
+};
+
+//checks to see which employee role is chosen and sets question variable to appropriate question based on user input
+async function roleChecker(data) {
+    let question;
+    if (data.role === "Engineer") {
+        question = "What is your gitHub username?"
+    } else if (data.role === "Intern") {
+        question = "What school are you attending?"
+    } else {
+        question = "What is your office number?"
+    };
+    //once an employee role is determined, inquirer prompts the new message for specified role.
+    const response = await inquirer.prompt([
+        {
+            type: "input",
+            message: question,
+            name: "answer"
+        }
+    ]);
+    //creates new engineer, intern, or manager
+    //console.log(response); //response.answer will get the value (answer) of the unique question.
+    let newGuy;
+    if (data.role === "Engineer") {
+        newGuy = new Engineer(data.name, data.id, data.email, response.answer)
+    } else if (data.role === "Intern") {
+        newGuy = new Intern(data.name, data.id, data.email, response.answer)
+    } else {
+        newGuy = new Manager(data.name, data.id, data.email, response.answer)
+    };
+    //console.log(newGuy);
+    team.push(newGuy);
+    //console.log(team);
+};
+
+//Need to allow them to pick another employeeif they want... then recycle initial questions.
+//When team is complete need to use the render function and writefile...
+
+initialQuestions();
+
+
+
